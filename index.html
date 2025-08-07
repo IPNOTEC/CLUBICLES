@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLUBICLES - Future of Collaboration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --violet: #8F00FF;
+            --indigo: #0070B0;
+            --blue: #00B0F0;
+            --green: #45DE10;
+            --yellow: #FFF000;
+            --orange: #FF6900;
+            --red: #FF000F;
+            --white: #FFFFFF;
+            --black: #000000;
+            --grey: #777;
+            --darkgrey: #2A2A2A;
+            --cubicle-gray: #333333;
+            --glass: rgba(255, 255, 255, 0.08);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #111;
+            color: var(--white);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Static Grid Background */
+        .grid-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        
+        .cubicle-frame {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .cubicle-wall {
+            position: absolute;
+            background-color: var(--cubicle-gray);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        
+        .wall-top { top: 0; left: 0; width: 100%; height: 80px; }
+        .wall-bottom { bottom: 0; left: 0; width: 100%; height: 100px; }
+        .wall-left { top: 0; left: 0; width: 60px; height: 100%; }
+        .wall-right { top: 0; right: 0; width: 60px; height: 100%; }
+        
+        .cubicle-texture {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.3) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+        
+        .frame-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 85vh;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+        
+        .deck-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background-color: var(--black);
+            padding: 0;
+            position: relative;
+        }
+        
+        .slide {
+            width: 100%;
+            min-height: 100%;
+            padding: 70px 30px 100px;
+            background-color: var(--black);
+            position: relative;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .slide-header {
+            position: absolute;
+            top: 30px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--white);
+            z-index: 10;
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            color: var(--white);
+            max-width: 90%;
+            margin: 0 auto;
+        }
+        
+        h1 { 
+            font-size: 4.5rem; 
+            text-align: center; 
+            margin-bottom: 20px; 
+            line-height: 1.1;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        
+        h2 { 
+            font-size: 3.5rem; 
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+        
+        h3 { 
+            font-size: 2rem; 
+            margin-bottom: 25px;
+            color: var(--orange);
+        }
+        
+        p, li {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: var(--white);
+            max-width: 800px;
+        }
+        
+        ul { 
+            list-style-type: none; 
+            padding: 0; 
+            margin: 25px 0; 
+            text-align: left; 
+        }
+        
+        li { 
+            margin-bottom: 15px; 
+            position: relative; 
+            padding-left: 35px; 
+            font-size: 1.2rem; 
+        }
+        
+        li:before { 
+            content: "■"; 
+            position: absolute; 
+            left: 0; 
+            font-size: 1.2rem; 
+            color: var(--orange); 
+        }
+        
+        .currency { 
+            color: var(--green); 
+            font-weight: bold; 
+            text-shadow: 0 0 10px rgba(69, 222, 16, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .currency:hover {
+            text-shadow: 0 0 20px rgba(69, 222, 16, 0.8);
+        }
+        
+        #pingBtn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: transparent;
+            color: var(--orange);
+            border: 2px solid var(--orange);
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            z-index: 100;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            display: none;
+        }
+        
+        #pingBtn:hover { 
+            background-color: var(--orange);
+            color: var(--black);
+            transform: scale(1.05); 
+        }
+        
+        .content-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(0,0,0,0.7);
+            border-radius: 15px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 1.1rem;
+            color: #aaa;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1100px;
+            text-align: left;
+            font-family: 'Share Tech Mono', monospace;
+            height: 100%;
+            max-height: 65vh;
+        }
+
+        .dashboard-filters { display: flex; gap: 15px; margin-bottom: 15px; }
+        .dashboard-filters select, .dashboard-filters input {
+            background-color: var(--darkgrey);
+            color: var(--white);
+            border: 1px solid var(--grey);
+            border-radius: 5px;
+            padding: 8px;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .dashboard-grid-container { overflow-y: auto; padding-right: 10px; }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .clubicle-card {
+            background: var(--darkgrey);
+            border-radius: 8px;
+            border: 2px solid;
+            padding: 12px;
+            min-height: 140px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        .clubicle-card.selected { transform: translateY(-5px); border-width: 3px; }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px var(--glow-color), 0 0 10px var(--glow-color); }
+            50% { box-shadow: 0 0 20px var(--glow-color), 0 0 30px var(--glow-color); }
+            100% { box-shadow: 0 0 5px var(--glow-color), 0 0 10px var(--glow-color); }
+        }
+        .glow { animation: glow 2s infinite ease-in-out; }
+        .violet.glow { --glow-color: var(--violet); }
+        .green.glow { --glow-color: var(--green); }
+        .yellow.glow { --glow-color: var(--yellow); }
+        .indigo.glow { --glow-color: var(--indigo); }
+        .red.glow { --glow-color: var(--red); }
+
+
+        .clubicle-card .direction { font-size: 11px; opacity: 0.7; margin-bottom: 4px; }
+        .clubicle-card h4 { font-size: 14px; margin: 4px 0; font-family: 'Orbitron', sans-serif; }
+        .clubicle-card .occupancy { font-size: 12px; margin: 4px 0; }
+        .clubicle-card .user-type { font-size: 10px; opacity: 0.8; margin-bottom: 6px; }
+        .clubicle-card .chat-preview { font-size: 10px; line-height: 1.2; border-top: 1px solid; padding-top: 4px; opacity: 0.9; }
+
+        .dashboard-details {
+            background: var(--glass);
+            border: 2px solid var(--white);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .dashboard-details h3 { font-size: 1.5rem; margin-bottom: 15px; }
+        
+        .details-occupancy { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+        .seat { width: 20px; height: 20px; border-radius: 4px; }
+        .occupied { background-color: var(--red); }
+        .vacant { background-color: var(--green); }
+
+        .details-chat { flex-grow: 1; overflow-y: auto; background-color: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+        .chat-message { display: flex; margin-bottom: 8px; }
+        .chat-user { font-weight: bold; padding-right: 8px; }
+        .chat-text { word-break: break-all; }
+
+        .chat-input-container { display: flex; gap: 10px; }
+        .chat-input-container input { flex-grow: 1; background: var(--darkgrey); border: 1px solid var(--grey); padding: 8px; color: var(--white); border-radius: 5px; }
+        .chat-input-container button { background: var(--blue); color: var(--black); border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
+        .color-violet { color: var(--violet); } .color-indigo { color: var(--indigo); } .color-blue { color: var(--blue); } .color-green { color: var(--green); } .color-yellow { color: var(--yellow); } .color-orange { color: var(--orange); } .color-red { color: var(--red); }
+
+        .coming-soon { opacity: 0.6; filter: saturate(0.5); cursor: not-allowed; }
+        
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 200;
+            display: none; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: var(--darkgrey); padding: 20px; border-radius: 10px;
+            position: relative; width: 90%; max-width: 700px; height: 90%;
+        }
+        .modal-close {
+            position: absolute; top: 10px; right: 15px; font-size: 2rem;
+            color: var(--white); cursor: pointer;
+        }
+        .modal-content iframe { width: 100%; height: 100%; border: none; }
+        
+        .info-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 200;
+            display: none; justify-content: center; align-items: center;
+        }
+        .info-modal-content {
+            background: var(--darkgrey); 
+            padding: 30px; 
+            border-radius: 10px;
+            position: relative; 
+            width: 90%; 
+            max-width: 600px;
+            border: 2px solid var(--orange);
+        }
+        .info-modal-close {
+            position: absolute; top: 10px; right: 15px; font-size: 2rem;
+            color: var(--white); cursor: pointer;
+        }
+        
+        .scrolling-tape {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #000;
+            color: var(--orange);
+            font-weight: bold;
+            padding: 12px 0;
+            z-index: 100;
+            overflow: hidden;
+            white-space: nowrap;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        }
+        
+        .scrolling-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scrollTape 25s linear infinite;
+        }
+        
+        @keyframes scrollTape {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        .section-header {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: var(--orange);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 10;
+        }
+        
+        /* NEW STYLES */
+        .white-bg .stat-card:hover * {
+            color: var(--black) !important;
+        }
+        
+        .clickable-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--orange);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+        
+        .persona-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .persona-table th, .persona-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .persona-table th {
+            background: rgba(255,255,255,0.15);
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            color: var(--orange);
+        }
+        
+        .persona-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .persona-table tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .persona-table .highlight {
+            color: var(--green);
+            font-weight: bold;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-container { grid-template-columns: 1fr; max-height: none; }
+            .dashboard-grid-container { max-height: 30vh; }
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            h2 { font-size: 2.5rem; }
+            h3 { font-size: 1.8rem; }
+            p, li { font-size: 1.2rem; }
+            .frame-container { height: 85vh; }
+            .dashboard-filters { flex-direction: column; }
+            .stat-grid { grid-template-columns: 1fr; }
+            .section-header {
+                top: 20px;
+                right: 20px;
+                font-size: 1rem;
+            }
+            #pingBtn {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            .persona-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Static Grid Background -->
+    <div class="grid-background"></div>
+    
+    <!-- Cubicle frame -->
+    <div class="cubicle-frame">
+        <div class="cubicle-wall wall-top"></div>
+        <div class="cubicle-wall wall-bottom"></div>
+        <div class="cubicle-wall wall-left"></div>
+        <div class="cubicle-wall wall-right"></div>
+        <div class="cubicle-texture"></div>
+    </div>
+    
+    <div class="frame-container">
+        <div class="deck-container">
+            <!-- Slide 1: Cover -->
+            <div class="slide">
+                <div class="content-container" style="border: 6px solid var(--violet);">
+                    <h1>CLUBICLES</h1>
+                    <h2 style="font-size: 2.2rem; margin-top: -10px;">FUTURE OF COLLABORATION</h2>
+                    <p>Revolutionizing co-working by aggregating spaces into a seamless subscription platform</p>
+                    <p>"Work anywhere, belong everywhere"</p>
+                </div>
+                <div class="section-header">IPNOTEC PITCHING</div>
+            </div>
+            
+            <!-- Slide 2: Our Story -->
+            <div class="slide">
+                <div class="section-header">OUR STORY</div>
+                <div class="content-container" style="border: 6px solid var(--indigo);">
+                    <h3>Transforming Workspace Access</h3>
+                    <p>CLUBICLES was born from a vision to democratize access to quality workspaces. We recognized that while large co-working chains dominate the market, countless small spaces remain underutilized. Our platform bridges this gap.</p>
+                    <div class="stat-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">15-min</div>
+                            <div class="stat-label">Workspace Access</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">50%</div>
+                            <div class="stat-label">CO₂ Reduction</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">70%</div>
+                            <div class="stat-label">Space Efficiency</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 3: The Problem -->
+            <div class="slide">
+                <div class="section-header">THE PROBLEM</div>
+                <div class="content-container" style="border: 6px solid var(--blue);">
+                    <h3>Workspace Inefficiency</h3>
+                    <p>Millions of square feet of commercial space sit empty while professionals struggle to find affordable, convenient workspaces.</p>
+                    <ul>
+                        <li>High costs of traditional co-working memberships</li>
+                        <li>Limited availability in non-central locations</li>
+                        <li>Rigid booking systems with long-term commitments</li>
+                        <li>82% of freelancers report difficulty finding affordable, professional workspaces</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Slide 4: Our Solution -->
+            <div class="slide">
+                <div class="section-header">OUR SOLUTION</div>
+                <div class="content-container" style="border: 6px solid var(--green);">
+                    <h3>The CLUBICLES Platform <span style="font-size:1.2rem; color:var(--yellow);">(Click cards for details)</span></h3>
+                    <p>A subscription-based marketplace connecting professionals with underutilized workspaces in their vicinity.</p>
+                    <div class="stat-grid">
+                        <div class="stat-card" id="spaceOwnersCard" style="position:relative;">
+                            <div class="clickable-indicator"></div>
+                            <h4>For Space Owners</h4>
+                            <p>Monetize unused space with easy management</p>
+                        </div>
+                        <div class="stat-card" id="membersCard" style="position:relative;">
+                            <div class="clickable-indicator"></div>
+                            <h4>For Members</h4>
+                            <p>Access hundreds of workspaces with one membership</p>
+                        </div>
+                        <div class="stat-card" id="smartMatchingCard" style="position:relative;">
+                            <div class="clickable-indicator"></div>
+                            <h4>Smart Matching</h4>
+                            <p>AI-powered algorithm for ideal space matching</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 5: Market Opportunity -->
+            <div class="slide">
+                <div class="section-header">MARKET OPPORTUNITY</div>
+                <div class="content-container" style="border: 6px solid var(--yellow); background-color: rgba(255,255,255,0.9);">
+                    <h3 style="color:var(--black);">Massive Growth Potential</h3>
+                    <div class="stat-grid">
+                        <div class="stat-card"><div class="stat-value" style="color:var(--black);">$22B</div><div class="stat-label">Global Market (2024)</div></div>
+                        <div class="stat-card"><div class="stat-value" style="color:var(--black);">₹6000 Cr</div><div class="stat-label">India Market</div></div>
+                        <div class="stat-card"><div class="stat-value" style="color:var(--black);">15M+</div><div class="stat-label">Target Users</div></div>
+                    </div>
+                    <ul style="color:var(--black);">
+                        <li style="color:var(--black);">25% CAGR through 2028</li>
+                        <li style="color:var(--black);">CLUBICLES target: <span class="currency">₹15 Crore</span> revenue by 2028</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 6: Product Features -->
+            <div class="slide">
+                <div class="section-header">PRODUCT FEATURES</div>
+                <div class="content-container" style="border: 6px solid var(--orange);">
+                    <h3>Powering Flexible Work</h3>
+                     <div class="stat-grid">
+                        <div class="stat-card"><h4>Flexible Memberships</h4><p>Hourly, daily, weekly or monthly plans</p></div>
+                        <div class="stat-card"><h4>Real-time Tracking</h4><p>Live occupancy and availability</p></div>
+                        <div class="stat-card"><h4>Space Owner Dashboard</h4><p>Easy management of availability and pricing</p></div>
+                        <div class="stat-card"><h4>Direction-based Blocks</h4><p>Discover nearby spaces visually</p></div>
+                        <div class="stat-card"><h4>Community Events</h4><p>Networking opportunities</p></div>
+                        <div class="stat-card"><h4>Integrated Payment</h4><p>Seamless transactions</p></div>
+                     </div>
+                </div>
+            </div>
+            
+            <!-- Slide 7: Go-To-Market -->
+            <div class="slide">
+                <div class="section-header">GO-TO-MARKET</div>
+                <div class="content-container white-bg" style="border: 6px solid var(--white); background-color: rgba(255,255,255,0.9);">
+                    <h3 style="color:var(--black);">Strategic Rollout</h3>
+                     <div class="stat-grid">
+                        <div class="stat-card"><h4>Phase 1: Bangalore</h4><p>50+ spaces<br>1,000 members<br>₹1.5 Cr revenue</p></div>
+                        <div class="stat-card"><h4>Phase 2: Metro Cities</h4><p>5 cities<br>10,000 members<br>₹7.2 Cr revenue</p></div>
+                        <div class="stat-card"><h4>Phase 3: Nationwide</h4><p>500+ spaces<br>50,000 members<br>₹30 Cr revenue</p></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 8: Financials -->
+            <div class="slide">
+                <div class="section-header">FINANCIALS</div>
+                <div class="content-container" style="border: 6px solid var(--grey);">
+                    <h3>Projected Growth</h3>
+                    <div class="stat-grid">
+                        <div class="stat-card" id="mvpCostCard"><div class="stat-value currency">₹70L</div><div class="stat-label">MVP Cost</div></div>
+                        <div class="stat-card"><div class="stat-value">₹12K</div><div class="stat-label">Avg. Revenue per User</div></div>
+                        <div class="stat-card"><div class="stat-value">₹60K</div><div class="stat-label">Lifetime Value</div></div>
+                    </div>
+                     <ul>
+                        <li>Year 1: 2,500 members → ₹1.5 Cr revenue</li>
+                        <li>Year 2: 12,000 members → ₹7.2 Cr revenue</li>
+                        <li>Projected profitability by Month 18</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Slide 9: Competitive Advantage -->
+            <div class="slide">
+                <div class="section-header">COMPETITIVE ADVANTAGE</div>
+                <div class="content-container" style="border: 6px solid var(--violet);">
+                    <h3>Why CLUBICLES Wins</h3>
+                    <div class="stat-grid">
+                        <div class="stat-card"><div class="stat-value">10x</div><div class="stat-label">More locations</div></div>
+                        <div class="stat-card"><div class="stat-value">15-min</div><div class="stat-label">Hyperlocal access</div></div>
+                        <div class="stat-card"><div class="stat-value">90%</div><div class="stat-label">Member satisfaction</div></div>
+                        <div class="stat-card"><div class="stat-label">Asset-light business model</div></div>
+                        <div class="stat-card"><div class="stat-label">Sustainability focus - reducing carbon footprint</div></div>
+                        <div class="stat-card"><div class="stat-label">Community ownership opportunities</div></div>
+                    </div>
+                    
+                    <h4 style="margin-top: 30px; font-family: 'Orbitron';">Persona Comparison</h4>
+                    <table class="persona-table">
+                        <thead>
+                            <tr>
+                                <th>Persona</th>
+                                <th>Standard Co-working</th>
+                                <th>CLUBICLES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Introvert IT Employee</strong></td>
+                                <td>Limited quiet zones, fixed location</td>
+                                <td class="highlight">Quiet spaces near home, flexible hours</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Extrovert</strong></td>
+                                <td>Networking limited to one location</td>
+                                <td class="highlight">Access to multiple communities and events</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Traveler</strong></td>
+                                <td>Requires multiple memberships</td>
+                                <td class="highlight">One membership, access anywhere</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Young Focused Student</strong></td>
+                                <td>Expensive, long-term commitments</td>
+                                <td class="highlight">Affordable hourly rates, no commitments</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Slide 10: Dashboard -->
+            <div class="slide">
+                <div class="section-header">LIVE DASHBOARD</div>
+                <div style="width: 100%; max-width: 1100px;">
+                    <div class="dashboard-filters">
+                        <select id="cityFilter">
+                            <option value="all">All Cities</option>
+                            <option value="Bengaluru">Bengaluru</option>
+                            <option value="Mumbai">Mumbai</option>
+                            <option value="Delhi">Delhi</option>
+                        </select>
+                        <input type="text" id="pincodeFilter" placeholder="Pincode (optional)">
+                    </div>
+                    <div class="dashboard-container">
+                        <div class="dashboard-grid-container">
+                            <div class="dashboard-grid" id="dashboard-grid">
+                                <!-- Cards will be populated by JS -->
+                            </div>
+                        </div>
+                        <div class="dashboard-details" id="dashboard-details">
+                             <h3>Select a Clubicle</h3>
+                             <p style="font-size:1rem; color: #aaa;">Filter by city and click a location to see its real-time status and join the HUB CHAT.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 11: Investment Opportunity -->
+            <div class="slide">
+                <div class="section-header">INVESTMENT</div>
+                <div class="content-container" style="border: 6px solid var(--red);">
+                    <h3>Join Our Journey</h3>
+                    <ul>
+                        <li>Seeding <span class="currency" id="investmentAmount">₹3 Crores</span> for 15% equity</li>
+                        <li>Use of funds: Tech (40%), Marketing (30%), Operations (30%)</li>
+                        <li>10x return projected in 3-5 years</li>
+                    </ul>
+                    <p style="margin-top: 30px; font-size: 1.8rem;">Let's build the future of work together</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- PING Button (only visible on last slide) -->
+    <button id="pingBtn">PING BharathBholeY</button>
+    
+    <!-- Scrolling tape -->
+    <div class="scrolling-tape">
+        <div class="scrolling-content">
+            🔥 CLUBICLES MEMBERSHIP - ₹100001 | Share your Location + Pin Code → Build your Local Co-working Hub → Profit Share Starts When Setup is Live → Withdraw Anytime 🔁 SMART COLLABORATION. FUTURE COMMUNITY. 🔁
+        </div>
+    </div>
+    
+    <!-- Info Modals -->
+    <div class="info-modal" id="spaceOwnersModal">
+        <div class="info-modal-content">
+            <span class="info-modal-close" id="spaceOwnersClose">&times;</span>
+            <h3>For Space Owners</h3>
+            <p>Our platform allows space owners to monetize their underutilized spaces with minimal effort:</p>
+            <ul>
+                <li>Easy onboarding process</li>
+                <li>Real-time occupancy tracking</li>
+                <li>Automated billing and payments</li>
+                <li>Dynamic pricing based on demand</li>
+                <li>Detailed analytics dashboard</li>
+            </ul>
+            <p style="margin-top: 20px; color: var(--green);">Average space owner earnings: ₹35,000/month</p>
+        </div>
+    </div>
+    
+    <div class="info-modal" id="membersModal">
+        <div class="info-modal-content">
+            <span class="info-modal-close" id="membersClose">&times;</span>
+            <h3>For Members</h3>
+            <p>Members enjoy unprecedented flexibility and access to workspaces:</p>
+            <ul>
+                <li>Single subscription for hundreds of locations</li>
+                <li>24/7 access with mobile app</li>
+                <li>Flexible plans - hourly, daily, monthly</li>
+                <li>Community networking events</li>
+                <li>Premium amenities at affordable prices</li>
+            </ul>
+            <p style="margin-top: 20px; color: var(--green);">Average member savings: 40% vs traditional coworking</p>
+        </div>
+    </div>
+    
+    <div class="info-modal" id="smartMatchingModal">
+        <div class="info-modal-content">
+            <span class="info-modal-close" id="smartMatchingClose">&times;</span>
+            <h3>Smart Matching</h3>
+            <p>Our AI-powered matching system connects members with the perfect workspace:</p>
+            <ul>
+                <li>Personalized recommendations based on preferences</li>
+                <li>Real-time availability matching</li>
+                <li>Community-based matching (find spaces with similar professionals)</li>
+                <li>Predictive availability forecasting</li>
+                <li>Seamless booking with one click</li>
+            </ul>
+            <p style="margin-top: 20px; color: var(--green);">95% match satisfaction rate</p>
+        </div>
+    </div>
+    
+    <!-- MVP Cost Modal -->
+    <div class="info-modal" id="mvpCostModal">
+        <div class="info-modal-content">
+            <span class="info-modal-close" id="mvpCostClose">&times;</span>
+            <h3>MVP Cost Breakdown (₹70 Lakhs)</h3>
+            <ul>
+                <li><strong>Technology Development (₹25L)</strong> - Platform development, mobile apps, API integrations</li>
+                <li><strong>Domain & Security (₹10L)</strong> - Premium domains, SSL certificates, security audits</li>
+                <li><strong>Team Salaries (1 Year) (₹20L)</strong> - Core team of 5 (2 devs, 1 designer, 1 sales, 1 ops)</li>
+                <li><strong>Marketing & Branding (₹8L)</strong> - Website, branding, initial marketing campaigns</li>
+                <li><strong>Legal & Compliance (₹5L)</strong> - Business registration, contracts, legal fees</li>
+                <li><strong>Miscellaneous (₹2L)</strong> - Office space, hosting, other operational costs</li>
+            </ul>
+            <p style="margin-top: 20px; color: var(--green);">Projected runway: 12 months to first revenue</p>
+        </div>
+    </div>
+    
+    <!-- Investment Modal -->
+    <div class="info-modal" id="investmentModal">
+        <div class="info-modal-content">
+            <span class="info-modal-close" id="investmentClose">&times;</span>
+            <h3>₹3 Crore Fund Allocation</h3>
+            <ul>
+                <li><strong>Technology (40% - ₹1.2 Cr)</strong> - Platform scaling, AI features, mobile apps</li>
+                <li><strong>Marketing (30% - ₹90L)</strong> - Digital campaigns, partnerships, brand awareness</li>
+                <li><strong>Operations (30% - ₹90L)</strong> - Team expansion, city launches, customer support</li>
+            </ul>
+            <h4 style="margin-top: 20px;">Detailed Breakdown:</h4>
+            <ul>
+                <li>Engineering Team (6 members): ₹60L</li>
+                <li>Marketing Team (4 members): ₹40L</li>
+                <li>City Launches (5 cities): ₹50L</li>
+                <li>Technology Infrastructure: ₹30L</li>
+                <li>Performance Marketing: ₹60L</li>
+                <li>Working Capital: ₹60L</li>
+            </ul>
+            <p style="margin-top: 20px; color: var(--green);">Projected Milestone: 12,000 members by Year 2</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Dashboard data
+            const clubiclesData = [
+                 // Bengaluru
+                 { id: 0, city: "Bengaluru", pincode: "560092", name: "DEVANAHALLI.001", direction: "NORTH", occupancy: "3/15", userType: "Founders/Investors", chatPreview: "[VC] Series-A talks", color: "violet", isOpen: true, seats: [1,0,1,1,0,0,0,0,0,0,0,0,1,0,0], chat: [{u:"Founder", m:"Demo at 3PM", c:"red"}, {u:"Admin", m:"Coffee machine serviced ☕", c:"green"}] },
+                 { id: 1, city: "Bengaluru", pincode: "560078", name: "JAYANAGAR.002", direction: "SOUTH", occupancy: "12/15", userType: "Startups/Design", chatPreview: "[Proto] Testing phase", color: "yellow", isOpen: true, seats: [1,1,1,1,0,1,1,1,1,1,0,1,1,0,1], chat: [{u:"UI/UX", m:"Moodboard uploaded", c:"yellow"}, {u:"PM", m:"Tasks re-assigned", c:"blue"}] },
+                 { id: 2, city: "Bengaluru", pincode: "560049", name: "KR PURAM.003", direction: "EAST", occupancy: "FULL", userType: "Events/Creators", chatPreview: "[Live] Product Launch", color: "red", isOpen: false, seats: [1,1,1,1,1,1,1,1], chat: [{u:"Marketing", m:"Reel got 10k views 🎉", c:"orange"}, {u:"CTO", m:"Code freeze tomorrow", c:"red"}] },
+                 { id: 3, city: "Bengaluru", pincode: "560066", name: "WHITEFIELD.004", direction: "WEST", occupancy: "4/50", userType: "AI/Research", chatPreview: "[ML] Model training", color: "indigo", isOpen: true, seats: [1,0,1,0,1, ...Array(45).fill(0)], chat: [{u:"DataSci", m:"New dataset available.", c:"indigo"}, {u:"AI Lead", m:"Check model accuracy.", c:"violet"}] },
+                 // Mumbai
+                 { id: 4, city: "Mumbai", pincode: "400051", name: "BANDRA.M01", direction: "WEST SUBURBS", occupancy: "8/20", userType: "Media/Entertainment", chatPreview: "Script reading ongoing", color: "orange", isOpen: true, seats: [1,1,1,0,1,0,1,1,1,0, ...Array(10).fill(0)], chat: [{u:"Director", m:"Scene 4 needs a rewrite", c:"red"}, {u:"Writer", m:"On it!", c:"green"}] },
+                 { id: 5, city: "Mumbai", pincode: "400001", name: "FORT.M02", direction: "SOUTH MUMBAI", occupancy: "18/25", userType: "Finance/Law", chatPreview: "Market analysis discussion", color: "blue", isOpen: true, seats: Array(18).fill(1).concat(Array(7).fill(0)), chat: [{u:"Analyst", m:"Market looks bullish", c:"green"}, {u:"Lawyer", m:"Reviewing contracts", c:"blue"}] },
+                 { id: 6, city: "Mumbai", pincode: "400072", name: "POWAI.M03", direction: "CENTRAL SUBURBS", occupancy: "CLOSED", userType: "Tech/Startups", chatPreview: "Closed for renovation", color: "grey", isOpen: false, comingSoon: true },
+                 // Delhi
+                 { id: 7, city: "Delhi", pincode: "110016", name: "HAUZ KHAS.D01", direction: "SOUTH DELHI", occupancy: "5/12", userType: "Art/Design", chatPreview: "Gallery prep underway", color: "green", isOpen: true, seats: [1,1,0,0,1,1,1,0,0,0,0,0], chat: [{u:"Artist", m:"Final touches on the canvas", c:"yellow"}, {u:"Curator", m:"Lighting check at 5", c:"violet"}] },
+                 { id: 8, city: "Delhi", pincode: "110001", name: "CP.D02", direction: "CENTRAL", occupancy: "25/30", userType: "Corporate/Retail", chatPreview: "Strategy meeting in progress", color: "violet", isOpen: true, seats: Array(25).fill(1).concat(Array(5).fill(0)), chat: [{u:"CEO", m:"Q3 targets look promising", c:"red"}, {u:"RetailHead", m:"New store opening next week", c:"orange"}] },
+            ];
+
+            const grid = document.getElementById('dashboard-grid');
+            const detailsPanel = document.getElementById('dashboard-details');
+            const cityFilter = document.getElementById('cityFilter');
+            const pincodeFilter = document.getElementById('pincodeFilter');
+            let selectedClubicleId = null;
+
+            function filterAndPopulateGrid() {
+                const selectedCity = cityFilter.value;
+                const pincodeQuery = pincodeFilter.value.trim();
+                
+                const filteredData = clubiclesData.filter(club => {
+                    const cityMatch = selectedCity === 'all' || club.city === selectedCity;
+                    const pincodeMatch = pincodeQuery === '' || club.pincode.startsWith(pincodeQuery);
+                    return cityMatch && pincodeMatch;
+                });
+
+                grid.innerHTML = '';
+                filteredData.forEach(club => {
+                    const card = document.createElement('div');
+                    card.setAttribute('data-id', club.id);
+                    const glowClass = club.isOpen ? 'glow' : '';
+                    card.className = `clubicle-card ${club.color} ${glowClass} ${club.comingSoon ? 'coming-soon' : ''}`;
+                    card.innerHTML = `
+                        <div>
+                            <div class="direction">${club.direction}</div>
+                            <h4>${club.name}</h4>
+                            <div class="occupancy">${club.comingSoon ? '🔘' : (club.isOpen ? '🟢' : '🔴')} ${club.occupancy}</div>
+                            <div class="user-type">${club.userType}</div>
+                        </div>
+                        <div class="chat-preview">${club.chatPreview}</div>
+                    `;
+                    if (!club.comingSoon) {
+                        card.onclick = () => selectClubicle(club.id);
+                    }
+                    grid.appendChild(card);
+                });
+                
+                if (selectedClubicleId !== null) {
+                    const stillExists = filteredData.some(c => c.id === selectedClubicleId);
+                    if (stillExists) {
+                       highlightCard(selectedClubicleId);
+                    } else {
+                       resetDetailsPanel();
+                    }
+                }
+            }
+
+            function highlightCard(clubId) {
+                document.querySelectorAll('.clubicle-card').forEach(c => c.classList.remove('selected'));
+                const cardToSelect = grid.querySelector(`[data-id='${clubId}']`);
+                 if(cardToSelect) cardToSelect.classList.add('selected');
+            }
+
+            function selectClubicle(clubId) {
+                selectedClubicleId = clubId;
+                const club = clubiclesData.find(c => c.id === clubId);
+                
+                detailsPanel.innerHTML = `
+                    <h3>${club.name}</h3>
+                    <p style="font-size:1rem; margin-bottom:15px; color: #ccc;">Real-time Status</p>
+                    <div class="details-occupancy" id="details-occupancy"></div>
+                    <h4 style="font-family: 'Orbitron'; font-size: 1.1rem; margin-bottom: 10px;">Community HUB CHAT</h4>
+                    <div class="details-chat" id="details-chat"></div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chat-input" placeholder="Join the conversation...">
+                        <button id="chat-send">SEND</button>
+                    </div>
+                `;
+                renderOccupancy(club);
+                renderChat(club);
+                highlightCard(clubId);
+
+                document.getElementById('chat-send').onclick = () => {
+                    const input = document.getElementById('chat-input');
+                    const message = input.value.trim();
+                    if (message) {
+                        club.chat.push({ u: 'You', m: message, c: 'blue' });
+                        input.value = '';
+                        renderChat(club);
+                    }
+                };
+            }
+            
+            function resetDetailsPanel() {
+                selectedClubicleId = null;
+                detailsPanel.innerHTML = `
+                    <h3>Select a Clubicle</h3>
+                    <p style="font-size:1rem; color: #aaa;">Filter by city and click a location to see its real-time status and join the HUB CHAT.</p>
+                `;
+            }
+
+            function renderOccupancy(club) {
+                const occDiv = document.getElementById('details-occupancy');
+                occDiv.innerHTML = '';
+                club.seats.forEach(seat => {
+                    const seatDiv = document.createElement('div');
+                    seatDiv.className = `seat ${seat ? 'occupied' : 'vacant'}`;
+                    occDiv.appendChild(seatDiv);
+                });
+            }
+
+            function renderChat(club) {
+                const chatDiv = document.getElementById('details-chat');
+                chatDiv.innerHTML = '';
+                club.chat.forEach(msg => {
+                    const p = document.createElement('div');
+                    p.className = 'chat-message';
+                    p.innerHTML = `<span class="chat-user color-${msg.c}">${msg.u}:</span> <span class="chat-text">${msg.m}</span>`;
+                    chatDiv.appendChild(p);
+                });
+                chatDiv.scrollTop = chatDiv.scrollHeight; 
+            }
+
+            // Dashboard filter event listeners
+            cityFilter.addEventListener('change', filterAndPopulateGrid);
+            pincodeFilter.addEventListener('input', filterAndPopulateGrid);
+            
+            // Modal functionality for solution cards
+            const spaceOwnersCard = document.getElementById('spaceOwnersCard');
+            const membersCard = document.getElementById('membersCard');
+            const smartMatchingCard = document.getElementById('smartMatchingCard');
+            const spaceOwnersModal = document.getElementById('spaceOwnersModal');
+            const membersModal = document.getElementById('membersModal');
+            const smartMatchingModal = document.getElementById('smartMatchingModal');
+            
+            spaceOwnersCard.addEventListener('click', () => spaceOwnersModal.style.display = 'flex');
+            membersCard.addEventListener('click', () => membersModal.style.display = 'flex');
+            smartMatchingCard.addEventListener('click', () => smartMatchingModal.style.display = 'flex');
+            
+            document.getElementById('spaceOwnersClose').addEventListener('click', () => spaceOwnersModal.style.display = 'none');
+            document.getElementById('membersClose').addEventListener('click', () => membersModal.style.display = 'none');
+            document.getElementById('smartMatchingClose').addEventListener('click', () => smartMatchingModal.style.display = 'none');
+            
+            // MVP Cost Modal
+            const mvpCostCard = document.getElementById('mvpCostCard');
+            const mvpCostModal = document.getElementById('mvpCostModal');
+            const mvpCostClose = document.getElementById('mvpCostClose');
+            
+            mvpCostCard.addEventListener('click', () => mvpCostModal.style.display = 'flex');
+            mvpCostClose.addEventListener('click', () => mvpCostModal.style.display = 'none');
+            
+            // Investment Modal
+            const investmentAmount = document.getElementById('investmentAmount');
+            const investmentModal = document.getElementById('investmentModal');
+            const investmentClose = document.getElementById('investmentClose');
+            
+            investmentAmount.addEventListener('click', () => investmentModal.style.display = 'flex');
+            investmentClose.addEventListener('click', () => investmentModal.style.display = 'none');
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === spaceOwnersModal) spaceOwnersModal.style.display = 'none';
+                if (e.target === membersModal) membersModal.style.display = 'none';
+                if (e.target === smartMatchingModal) smartMatchingModal.style.display = 'none';
+                if (e.target === mvpCostModal) mvpCostModal.style.display = 'none';
+                if (e.target === investmentModal) investmentModal.style.display = 'none';
+            });
+            
+            // WhatsApp ping functionality
+            const pingBtn = document.getElementById('pingBtn');
+            pingBtn.addEventListener('click', function() {
+                const phoneNumber = '+916292306090';
+                const message = 'Hello Bharath, I just reviewed the CLUBICLES pitch deck and would like to discuss investment opportunities!';
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                
+                window.open(whatsappUrl, '_blank');
+            });
+            
+            // Show ping button only on last slide
+            const slides = document.querySelectorAll('.slide');
+            const lastSlide = slides[slides.length - 1];
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.target === lastSlide && entry.isIntersecting) {
+                        pingBtn.style.display = 'block';
+                    } else {
+                        pingBtn.style.display = 'none';
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observer.observe(lastSlide);
+            
+            // Initialize dashboard
+            filterAndPopulateGrid();
+        });
+    </script>
+</body>
+</html>
